@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIMANTAP — Diskominfo Kab. Tangerang</title>
+    <meta
+      name="description"
+      content="Sistem Informasi Manajemen Aset Terpadu — Diskominfo Kabupaten Tangerang."
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <script>
+      // Dipasang SEBELUM halaman tergambar, persis seperti aplikasi lama:
+      //  - kelas ciut supaya menu samping tidak berkedip lebar-lalu-menyempit;
+      //  - mode terang/gelap supaya layar tidak berkedip putih dulu.
+      // Pilihan pengguna (localStorage) menang atas setelan sistem operasi.
+      try {
+        if (localStorage.getItem('sidebarCollapsed') === '1')
+          document.documentElement.classList.add('sb-collapsed')
+      } catch (e) {}
+      try {
+        var t = localStorage.getItem('theme')
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', t)
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
