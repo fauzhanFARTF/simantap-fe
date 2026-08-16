@@ -19,7 +19,7 @@ import { runAction, useAsync } from '@/composables/useAsync'
 import { useLiveFilter } from '@/composables/useLiveFilter'
 import { useAuthStore } from '@/stores/auth'
 import type { Asset, Category } from '@/types/models'
-import { fmtRupiah, fmtStock, photoUrl } from '@/utils/format'
+import { fmtDate, fmtRupiah, fmtStock, photoUrl } from '@/utils/format'
 
 const STATUS_FILTERS = ['Available', 'Booked', 'CheckedOut', 'Damaged', 'Lost', 'Retired']
 
@@ -55,6 +55,10 @@ const visible = computed(() =>
 const canManage = computed(() =>
   auth.hasRole('admin_gudang', 'admin', 'administrator_pembantu_manajemen_alat'),
 )
+/** Cetak QR per-alat: gugusan peran sedikit lebih luas dari canManage (ikut
+ * Supervisor), sama persis dengan `role_is('admin_gudang','admin','supervisor')`
+ * di aplikasi lama. */
+const canPrintBarcode = computed(() => auth.hasRole('admin_gudang', 'admin', 'supervisor'))
 const allChecked = computed(
   () => visible.value.length > 0 && selected.value.length === visible.value.length,
 )
@@ -187,6 +191,7 @@ onMounted(async () => {
             <th>Harga Dulu</th>
             <th>Nilai Sekarang</th>
             <th>Status</th>
+            <th>Diperbarui</th>
             <th></th>
           </tr>
         </thead>
@@ -236,11 +241,28 @@ onMounted(async () => {
             <td class="small">{{ fmtRupiah(asset.purchase_price) }}</td>
             <td class="small">{{ fmtRupiah(asset.current_value) }}</td>
             <td><StatusBadge :status="asset.status" :label="asset.status_label" /></td>
+            <td class="small">
+              <template v-if="asset.updated_by_name">
+                {{ asset.updated_by_name }}<br />
+                <span class="text-slate">{{ fmtDate(asset.updated_at) }}</span>
+              </template>
+              <span v-else class="text-slate">—</span>
+            </td>
             <td class="text-nowrap">
+              <RouterLink
+                v-if="canPrintBarcode"
+                :to="{ name: 'barcode-print', query: { uuids: asset.uuid } }"
+                target="_blank"
+                class="btn btn-sm btn-outline-navy"
+                title="Cetak QR Code"
+                :data-testid="`btn-barcode-${asset.id}`"
+              >
+                <i class="fa-solid fa-qrcode"></i>
+              </RouterLink>
               <template v-if="canManage">
                 <RouterLink
                   :to="`/inventory/${asset.uuid}/edit`"
-                  class="btn btn-sm btn-outline-navy"
+                  class="btn btn-sm btn-outline-navy ms-1"
                   :data-testid="`btn-edit-asset-${asset.id}`"
                 >
                   <i class="fa-regular fa-pen-to-square"></i>
@@ -269,7 +291,7 @@ onMounted(async () => {
             </td>
           </tr>
           <tr v-if="!visible.length">
-            <td :colspan="canManage ? 11 : 10" class="text-center text-slate py-4">
+            <td :colspan="canManage ? 12 : 11" class="text-center text-slate py-4">
               {{
                 assets.length
                   ? 'Tidak ada alat yang cocok dengan pencarian / filter.'

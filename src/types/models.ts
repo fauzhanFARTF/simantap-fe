@@ -129,9 +129,13 @@ export interface Asset extends AssetSlim {
   created_at: string
   updated_at: string
   has_loan_history: boolean
+  updated_by_name: string | null
 }
 
-export interface AssetDetail extends Asset, AuditTrail {}
+export interface AssetDetail extends Asset {
+  created_by_name: string | null
+  restored_by_name: string | null
+}
 
 export interface Package extends AuditTrail {
   uuid: string
