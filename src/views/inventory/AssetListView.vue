@@ -206,8 +206,8 @@ onMounted(async () => {
                 :src="photoUrl(asset.photo_url)"
                 :alt="`Foto ${asset.name}`"
                 style="
-                  width: 44px;
-                  height: 44px;
+                  width: 72px;
+                  height: 72px;
                   object-fit: cover;
                   border-radius: 8px;
                   border: 1px solid var(--sb-line);
