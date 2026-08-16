@@ -83,6 +83,15 @@ function bindVideo(element: unknown) {
       >
         <i class="fa-solid fa-camera"></i> Jepret
       </button>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-navy"
+        :data-testid="`${prefix}-switch-camera`"
+        title="Ganti kamera depan/belakang"
+        @click="capture.switchCamera()"
+      >
+        <i class="fa-solid fa-rotate"></i> Ganti Kamera
+      </button>
       <button type="button" class="btn btn-sm btn-outline-navy" @click="capture.closeCamera()">
         Tutup
       </button>

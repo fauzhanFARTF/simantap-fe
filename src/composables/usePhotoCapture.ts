@@ -21,7 +21,19 @@ export function usePhotoCapture(defaultPreview = '') {
   const changed = ref(false)
 
   const videoRef = ref<HTMLVideoElement | null>(null)
+  /** Kamera belakang secara default -- paling praktis untuk memotret alat/BMN. */
+  const facingMode = ref<'user' | 'environment'>('environment')
   let stream: MediaStream | null = null
+
+  async function startStream() {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode.value },
+      audio: false,
+    })
+    // Elemen <video> baru ada setelah panel dirender.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    if (videoRef.value) videoRef.value.srcObject = stream
+  }
 
   function selectFile(event: Event) {
     const input = event.target as HTMLInputElement
@@ -49,14 +61,8 @@ export function usePhotoCapture(defaultPreview = '') {
       return
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
-        audio: false,
-      })
       cameraOpen.value = true
-      // Elemen <video> baru ada setelah panel dirender.
-      await new Promise((resolve) => setTimeout(resolve, 0))
-      if (videoRef.value) videoRef.value.srcObject = stream
+      await startStream()
     } catch {
       // Paling sering: izin ditolak, atau halaman bukan HTTPS — kamera memang
       // hanya diizinkan peramban pada origin aman.
@@ -64,6 +70,26 @@ export function usePhotoCapture(defaultPreview = '') {
         'Tidak bisa membuka kamera. Pastikan izin kamera diberikan dan situs diakses lewat ' +
         'HTTPS. Anda tetap bisa memakai Upload Foto.'
       closeCamera()
+    }
+  }
+
+  /** Pindah kamera depan <-> belakang tanpa menutup panel. */
+  async function switchCamera() {
+    const previous = facingMode.value
+    facingMode.value = previous === 'environment' ? 'user' : 'environment'
+    stream?.getTracks().forEach((track) => track.stop())
+    try {
+      await startStream()
+    } catch {
+      // Perangkat cuma punya satu kamera, atau kamera lain tidak bisa diakses --
+      // kembali ke yang sebelumnya daripada membiarkan panel gelap tanpa aliran video.
+      facingMode.value = previous
+      try {
+        await startStream()
+      } catch {
+        error.value = 'Tidak bisa beralih kamera. Perangkat mungkin hanya punya satu kamera.'
+        closeCamera()
+      }
     }
   }
 
@@ -114,9 +140,11 @@ export function usePhotoCapture(defaultPreview = '') {
     error,
     changed,
     videoRef,
+    facingMode,
     selectFile,
     openCamera,
     closeCamera,
+    switchCamera,
     capture,
     reset,
   }

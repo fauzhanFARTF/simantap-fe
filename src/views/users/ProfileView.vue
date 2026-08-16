@@ -195,6 +195,15 @@ onMounted(async () => {
                   <button
                     type="button"
                     class="btn btn-outline-navy btn-sm"
+                    data-testid="btn-switch-camera"
+                    title="Ganti kamera depan/belakang"
+                    @click="capture.switchCamera()"
+                  >
+                    <i class="fa-solid fa-rotate"></i> Ganti Kamera
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-navy btn-sm"
                     data-testid="btn-close-camera"
                     @click="capture.closeCamera()"
                   >
