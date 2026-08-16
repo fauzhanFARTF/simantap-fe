@@ -116,7 +116,7 @@ async function submit() {
           <PhotoPicker
             :capture="capture"
             testid-prefix="register-photo"
-            hint="JPG/PNG/WEBP, maksimal 3MB. Bila dikosongkan, foto akun Google yang dipakai."
+            hint="JPG/PNG/WEBP, maksimal 10MB. Bila dikosongkan, foto akun Google yang dipakai."
           />
         </div>
 

@@ -8,8 +8,8 @@
 
 import { onBeforeUnmount, ref } from 'vue'
 
-const MAX_BYTES = 3 * 1024 * 1024
-/** Jepretan diperkecil supaya base64-nya ringan, jauh di bawah batas 3MB. */
+const MAX_BYTES = 10 * 1024 * 1024
+/** Jepretan diperkecil supaya base64-nya ringan, jauh di bawah batas 10MB. */
 const MAX_DIMENSION = 640
 
 export function usePhotoCapture(defaultPreview = '') {
@@ -28,7 +28,7 @@ export function usePhotoCapture(defaultPreview = '') {
     const selected = input.files?.[0]
     if (!selected) return
     if (selected.size > MAX_BYTES) {
-      error.value = 'Ukuran foto maksimal 3MB.'
+      error.value = 'Ukuran foto maksimal 10MB.'
       input.value = ''
       return
     }

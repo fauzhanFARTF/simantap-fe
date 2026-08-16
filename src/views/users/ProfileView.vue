@@ -158,7 +158,7 @@ onMounted(async () => {
                   <i class="fa-solid fa-camera"></i> Ambil dari Kamera
                 </button>
               </div>
-              <div class="form-text">JPG, PNG, atau WEBP. Maksimal 3MB.</div>
+              <div class="form-text">JPG, PNG, atau WEBP. Maksimal 10MB.</div>
 
               <div v-if="hasPhoto" class="form-check mt-2">
                 <input

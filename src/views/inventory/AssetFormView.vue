@@ -209,7 +209,7 @@ onMounted(async () => {
                 />
               </div>
               <div class="form-text">
-                JPG, PNG, atau WEBP, maks 3MB. Bisa unggah file, ambil dari kamera,
+                JPG, PNG, atau WEBP, maks 10MB. Bisa unggah file, ambil dari kamera,
                 <strong>atau</strong> tempel link foto (mis. Google Drive yang dibagikan publik).
                 Opsional — jika kosong, dipakai logo Diskominfo.
               </div>
