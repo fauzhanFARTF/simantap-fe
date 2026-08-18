@@ -21,6 +21,7 @@ const loading = ref(true)
 const error = ref('')
 
 const codeOf = (asset: AssetSlim) => asset.barcode || asset.bmn_number
+const brandModelOf = (asset: AssetSlim) => [asset.brand, asset.model].filter(Boolean).join(' ') || '—'
 
 const printPage = () => window.print()
 const closeWindow = () => window.close()
@@ -104,6 +105,8 @@ onMounted(async () => {
 
   <div v-else data-testid="barcode-grid">
     <div v-for="asset in assets" :key="asset.uuid" class="qr-page">
+      <div class="lbl-code-text">{{ codeOf(asset) }}</div>
+
       <div class="lbl-qr">
         <img
           v-if="qrCodes[asset.uuid]"
@@ -112,7 +115,7 @@ onMounted(async () => {
         />
       </div>
 
-      <div class="lbl-name">{{ asset.name }}</div>
+      <div class="lbl-brand-model">{{ brandModelOf(asset) }}</div>
     </div>
   </div>
 </template>
@@ -146,6 +149,15 @@ body {
   text-align: center;
 }
 
+.qr-page .lbl-code-text {
+  font-size: 18px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--sb-ink);
+  margin-bottom: 28px;
+}
+
 .qr-page .lbl-qr {
   display: flex;
   justify-content: center;
@@ -157,10 +169,10 @@ body {
   height: 300px !important;
 }
 
-.qr-page .lbl-name {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--sb-ink);
+.qr-page .lbl-brand-model {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sb-ink-2);
   text-transform: uppercase;
 }
 
