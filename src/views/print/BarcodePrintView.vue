@@ -12,8 +12,6 @@ import { useRoute } from 'vue-router'
 import { assetApi } from '@/api'
 import type { AssetSlim } from '@/types/models'
 
-const APP_NAME = 'SIMANTAP — Diskominfo Kab. Tangerang'
-
 const route = useRoute()
 
 const assets = ref<AssetSlim[]>([])
@@ -75,11 +73,6 @@ onMounted(async () => {
 
   <div v-else data-testid="barcode-grid">
     <div v-for="asset in assets" :key="asset.uuid" class="qr-page">
-      <div class="qr-page-head">
-        <div class="lbl-org">{{ APP_NAME }}</div>
-        <div class="lbl-name">{{ asset.name }}</div>
-      </div>
-
       <div class="lbl-qr">
         <img
           v-if="qrCodes[asset.uuid]"
@@ -89,6 +82,7 @@ onMounted(async () => {
       </div>
 
       <div class="lbl-code-text">{{ codeOf(asset) }}</div>
+      <div class="lbl-name">{{ asset.name }}</div>
       <div class="lbl-foot">Pindai QR dengan kamera HP atau alat pemindai QR</div>
     </div>
   </div>
@@ -116,42 +110,17 @@ body {
 }
 
 .qr-page {
-  max-width: 720px;
+  max-width: 560px;
   margin: 0 auto 24px;
   background: #fff;
-  padding: 48px 40px;
-}
-
-.qr-page-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 40px;
-}
-
-.qr-page-head .lbl-org {
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--sb-ink-3);
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.qr-page-head .lbl-name {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--sb-ink);
-  text-transform: uppercase;
-  text-align: right;
-  line-height: 1.15;
+  padding: 64px 40px;
+  text-align: center;
 }
 
 .qr-page .lbl-qr {
   display: flex;
   justify-content: center;
-  margin: 6px 0 36px;
+  margin-bottom: 28px;
 }
 
 .qr-page .lbl-qr img {
@@ -165,14 +134,20 @@ body {
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--sb-ink);
-  text-align: center;
+}
+
+.qr-page .lbl-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sb-ink-2);
+  text-transform: uppercase;
+  margin-top: 8px;
 }
 
 .qr-page .lbl-foot {
   font-size: 13px;
   color: var(--sb-ink-3);
-  text-align: center;
-  margin-top: 10px;
+  margin-top: 24px;
 }
 
 /* Satu alat, satu halaman -- baris berikutnya selalu mulai halaman baru. */
