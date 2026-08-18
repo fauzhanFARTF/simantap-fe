@@ -10,6 +10,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { assetApi } from '@/api'
+import logo from '@/assets/img/logo-kominfo-icon.png'
 import type { AssetSlim } from '@/types/models'
 
 const route = useRoute()
@@ -23,6 +24,40 @@ const codeOf = (asset: AssetSlim) => asset.barcode || asset.bmn_number
 
 const printPage = () => window.print()
 const closeWindow = () => window.close()
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+/**
+ * QR dengan logo aplikasi di tengah. `errorCorrectionLevel: 'H'` (tahan ~30%
+ * area tertutup) WAJIB dipakai di sini -- tanpanya logo bisa membuat QR gagal
+ * dipindai karena menutup modul data yang dibutuhkan.
+ */
+async function renderQrWithLogo(text: string, QRCode: typeof import('qrcode')) {
+  const canvas = document.createElement('canvas')
+  await QRCode.toCanvas(canvas, text, { width: 320, margin: 1, errorCorrectionLevel: 'H' })
+
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    const logoImg = await loadImage(logo)
+    const box = canvas.width * 0.22
+    const x = (canvas.width - box) / 2
+    const y = (canvas.height - box) / 2
+    const pad = box * 0.12
+
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(x, y, box, box)
+    ctx.drawImage(logoImg, x + pad, y + pad, box - pad * 2, box - pad * 2)
+  }
+
+  return canvas.toDataURL('image/png')
+}
 
 onMounted(async () => {
   const uuids = String(route.query.uuids ?? '')
@@ -42,11 +77,7 @@ onMounted(async () => {
     // qrcode diimpor dinamis: hanya halaman ini yang membutuhkannya.
     const QRCode = (await import('qrcode')).default
     for (const asset of assets.value) {
-      qrCodes.value[asset.uuid] = await QRCode.toDataURL(codeOf(asset), {
-        width: 320,
-        margin: 1,
-        errorCorrectionLevel: 'M',
-      })
+      qrCodes.value[asset.uuid] = await renderQrWithLogo(codeOf(asset), QRCode)
     }
   } catch {
     error.value = 'Gagal memuat data alat.'
@@ -81,9 +112,7 @@ onMounted(async () => {
         />
       </div>
 
-      <div class="lbl-code-text">{{ codeOf(asset) }}</div>
       <div class="lbl-name">{{ asset.name }}</div>
-      <div class="lbl-foot">Pindai QR dengan kamera HP atau alat pemindai QR</div>
     </div>
   </div>
 </template>
@@ -128,26 +157,11 @@ body {
   height: 300px !important;
 }
 
-.qr-page .lbl-code-text {
-  font-size: 19px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--sb-ink);
-}
-
 .qr-page .lbl-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--sb-ink-2);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sb-ink);
   text-transform: uppercase;
-  margin-top: 8px;
-}
-
-.qr-page .lbl-foot {
-  font-size: 13px;
-  color: var(--sb-ink-3);
-  margin-top: 24px;
 }
 
 /* Satu alat, satu halaman -- baris berikutnya selalu mulai halaman baru. */
