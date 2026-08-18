@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
- * Lembar stiker QR alat, siap gunting & tempel.
+ * Label QR alat -- satu alat, satu halaman penuh saat dicetak.
  *
  * QR digambar dari `barcode` (jatuh ke `bmn_number` bila kosong) — nilai yang
- * sama persis dengan yang dibaca saat penyerahan/pengembalian, sehingga stiker
+ * sama persis dengan yang dibaca saat penyerahan/pengembalian, sehingga label
  * dan pemindai tidak pernah berbeda pendapat.
  */
 import { onMounted, ref } from 'vue'
@@ -45,7 +45,7 @@ onMounted(async () => {
     const QRCode = (await import('qrcode')).default
     for (const asset of assets.value) {
       qrCodes.value[asset.uuid] = await QRCode.toDataURL(codeOf(asset), {
-        width: 160,
+        width: 320,
         margin: 1,
         errorCorrectionLevel: 'M',
       })
@@ -61,8 +61,8 @@ onMounted(async () => {
 <template>
   <div class="toolbar no-print">
     <div class="hint">
-      <i class="fa-solid fa-circle-info"></i>&nbsp; {{ assets.length }} label QR siap dicetak.
-      Gunakan kertas label/sticker atau kertas biasa lalu gunting sesuai garis putus-putus.
+      <i class="fa-solid fa-circle-info"></i>&nbsp; {{ assets.length }} label QR siap dicetak,
+      satu alat per halaman.
     </div>
     <button class="btn btn-primary" data-testid="btn-print" @click="printPage">
       <i class="fa-solid fa-print"></i> Cetak
@@ -73,11 +73,13 @@ onMounted(async () => {
   <div v-if="loading" class="text-center text-slate py-5">Menyiapkan label…</div>
   <div v-else-if="error" class="alert alert-danger m-4">{{ error }}</div>
 
-  <div v-else class="label-sheet" data-testid="barcode-grid">
-    <div v-for="asset in assets" :key="asset.uuid" class="qr-label">
-      <div class="lbl-org">{{ APP_NAME }}</div>
-      <div class="lbl-name">{{ asset.name }}</div>
-      <div class="lbl-bmn">BMN: {{ asset.bmn_number }} · {{ asset.asset_code }}</div>
+  <div v-else data-testid="barcode-grid">
+    <div v-for="asset in assets" :key="asset.uuid" class="qr-page">
+      <div class="qr-page-head">
+        <div class="lbl-org">{{ APP_NAME }}</div>
+        <div class="lbl-name">{{ asset.name }}</div>
+      </div>
+
       <div class="lbl-qr">
         <img
           v-if="qrCodes[asset.uuid]"
@@ -85,6 +87,7 @@ onMounted(async () => {
           :alt="`QR ${codeOf(asset)}`"
         />
       </div>
+
       <div class="lbl-code-text">{{ codeOf(asset) }}</div>
       <div class="lbl-foot">Pindai QR dengan kamera HP atau alat pemindai QR</div>
     </div>
@@ -93,7 +96,7 @@ onMounted(async () => {
 
 <style>
 /* Tidak di-scope: halaman cetak ini menguasai seluruh dokumen, sama seperti
-   template cetak aplikasi lama yang berdiri sendiri di luar layout. */
+   template cetak aplikasi lain yang berdiri sendiri di luar layout. */
 body {
   background: #eef2f8;
 }
@@ -112,94 +115,86 @@ body {
   font-size: 13px;
 }
 
-.label-sheet {
-  max-width: 900px;
-  margin: 0 auto 40px;
-  padding: 0 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-
-.qr-label {
+.qr-page {
+  max-width: 720px;
+  margin: 0 auto 24px;
   background: #fff;
-  border: 1.5px dashed #b9c3d4;
-  border-radius: 10px;
-  padding: 18px 14px;
-  text-align: center;
-  break-inside: avoid;
-  page-break-inside: avoid;
+  padding: 48px 40px;
 }
 
-.qr-label .lbl-org {
-  font-size: 10px;
+.qr-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.qr-page-head .lbl-org {
+  font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--sb-ink-3);
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.qr-label .lbl-name {
-  font-size: 15px;
+.qr-page-head .lbl-name {
+  font-size: 26px;
   font-weight: 800;
-  color: #0f172a;
-  margin: 4px 0 2px;
-  line-height: 1.25;
-  min-height: 38px;
+  color: var(--sb-ink);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.15;
 }
 
-.qr-label .lbl-bmn {
-  font-size: 12px;
-  color: #475569;
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 10px;
-}
-
-.qr-label .lbl-qr {
+.qr-page .lbl-qr {
   display: flex;
   justify-content: center;
-  margin: 6px 0;
+  margin: 6px 0 36px;
 }
 
-.qr-label .lbl-qr img {
-  width: 160px !important;
-  height: 160px !important;
+.qr-page .lbl-qr img {
+  width: 300px !important;
+  height: 300px !important;
 }
 
-.qr-label .lbl-code-text {
-  font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
+.qr-page .lbl-code-text {
+  font-size: 19px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #0f172a;
-  margin: 8px 0 4px;
+  letter-spacing: 0.02em;
+  color: var(--sb-ink);
+  text-align: center;
 }
 
-.qr-label .lbl-foot {
-  font-size: 9.5px;
-  color: #94a3b8;
-  margin-top: 6px;
+.qr-page .lbl-foot {
+  font-size: 13px;
+  color: var(--sb-ink-3);
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Satu alat, satu halaman -- baris berikutnya selalu mulai halaman baru. */
+.qr-page + .qr-page {
+  page-break-before: always;
+  break-before: page;
 }
 
 @media print {
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 18mm;
   }
 
   body {
     background: #fff;
   }
 
-  .label-sheet {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  .qr-page {
     max-width: 100%;
-  }
-
-  .qr-label {
-    border-style: solid;
-    border-color: #d9dfe9;
+    margin: 0;
+    padding: 0;
   }
 }
 </style>
